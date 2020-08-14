@@ -1,0 +1,11 @@
+{
+  "name": "webrtc-demo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["server", "client"],
+  "scripts": {
+    "start": "cd server && yarn start"
+  },
+  "author": "ogunb <babacanogun@gmail.com>",
+  "license": "MIT"
+}
