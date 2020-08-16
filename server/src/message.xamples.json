@@ -1,0 +1,7 @@
+[
+  { "type": "LOGIN", "content": { "name": "deneme", "password": "deneme" } },
+
+  { "type": "CONNECTION_OFFER", "content": { "offer": "offer", "to": "RkKMgcTz7NXmEzaK", "from": { "name": "deneme", "_id": "Gt26XNBGTWejOYfJ" } } },
+
+  { "type": "CONNECTION_ANSWER", "content": { "offer": "offer", "to": "RkKMgcTz7NXmEzaK", "from": { "name": "deneme", "_id": "Gt26XNBGTWejOYfJ" } } }
+]

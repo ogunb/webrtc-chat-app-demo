@@ -3,7 +3,12 @@ import WebSocket from "ws";
 import { message } from "./types/message";
 import { messageTypes } from "./enums/message";
 
-import { handleUserLogin, sendMessageToOnlineUsers } from "./user";
+import {
+  handleUserLogin,
+  sendMessageToOnlineUsers,
+  offerConnection,
+  answerConnection,
+} from "./user";
 
 const parseMessage = (json: string): message => {
   try {
@@ -23,13 +28,22 @@ export default async function messageHandler(ws: WebSocket, json: string) {
 
   switch (type) {
     case messageTypes.LOGIN:
-      const newUser = await handleUserLogin(ws, content);
+      {
+        const newUser = await handleUserLogin(ws, content);
 
-      sendMessageToOnlineUsers(newUser, {
-        type: messageTypes.UPDATE_USERS,
-        content: { name: newUser.name, _id: newUser._id },
-      });
+        sendMessageToOnlineUsers(newUser, {
+          type: messageTypes.UPDATE_USERS,
+          content: { name: newUser.name, _id: newUser._id },
+        });
+      }
+      break;
 
+    case messageTypes.CONNECTION_OFFER:
+      await offerConnection(content);
+      break;
+
+    case messageTypes.CONNECTION_ANSWER:
+      await answerConnection(content);
       break;
 
     default:
