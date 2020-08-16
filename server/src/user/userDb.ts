@@ -1,16 +1,17 @@
-import { createDB, readDoc, insertDoc } from "./index";
-import { user } from '../types/user';
+import { createDB, readDoc, insertDoc } from "../database/index";
+import { user } from "./types/user";
 
 const USER_DB_NAME = "users";
 const userDB = createDB(USER_DB_NAME);
 
-export async function createUser(user: { name: string }): Promise<user> {
+export async function createUser(user: { name: string, password: string }): Promise<user> {
   if (!user.name) {
     throw new Error("Username is required.");
   }
 
   const newUser = await insertDoc(userDB, {
     name: user.name,
+    password: user.password // pretend it's secured
   });
 
   return newUser;
@@ -34,8 +35,7 @@ export async function getUserByName(name: string): Promise<user> {
   return user;
 }
 
-(async function () {
-  const { _id } = await createUser({ name: 'deneme' })
-  console.log(await getUserByName('deneme'));
-  console.log(await getUserById(_id));
-}());
+export async function getAllUsers(): Promise<user[]> {
+  const users = await userDB.getAllData();
+  return users;
+}

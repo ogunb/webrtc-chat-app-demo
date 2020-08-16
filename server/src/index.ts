@@ -2,26 +2,27 @@ import express from "express";
 import WebSocket from "ws";
 import http from "http";
 
+import messageHandler from "./messageHandler";
+import { messageTypes } from "./enums/message";
+
+import { sendMessage } from "./helpers";
+
 const app = express();
 const PORT = process.env.PORT || 9000;
 
 const server = http.createServer(app);
 
 const wss = new WebSocket.Server({ server });
-
-const messageHandler = (message: String): void => {
-  console.log(`New message: ${message}`);
-};
-
 wss.on("connection", (ws) => {
-  ws.on("message", messageHandler);
+  ws.on("message", (json: string) => {
+    messageHandler(ws, json).catch((err) => sendMessage(ws, err));
+  });
 
-  ws.send(
-    JSON.stringify({
-      type: "connect",
-      message: `Connected: ${PORT}`,
-    })
-  );
+  sendMessage(ws, {
+    type: messageTypes.CONNECT,
+    success: true,
+    content: "Connected",
+  });
 });
 
 server.listen(PORT, () => {
