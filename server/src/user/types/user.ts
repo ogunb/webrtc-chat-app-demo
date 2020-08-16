@@ -3,7 +3,7 @@ export type userId = string;
 export interface user {
   _id: userId;
   name: string;
-  password: string;
+  password?: string;
 }
 
 export interface connectionOfferRequest {

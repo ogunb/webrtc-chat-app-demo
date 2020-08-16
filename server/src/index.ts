@@ -14,7 +14,7 @@ const server = http.createServer(app);
 
 const wss = new WebSocket.Server({ server });
 wss.on("connection", (ws) => {
-  ws.on("message", (json: string) => {
+   ws.on("message", (json: string) => {
     messageHandler(ws, json).catch((err) => sendMessage(ws, err));
   });
 

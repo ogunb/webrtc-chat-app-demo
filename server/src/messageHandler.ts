@@ -9,6 +9,7 @@ import {
   offerConnection,
   answerConnection,
   sendConnectionCandidate,
+  handleUserLogout,
 } from "./user";
 
 const parseMessage = (json: string): message => {
@@ -33,7 +34,7 @@ export default async function messageHandler(ws: WebSocket, json: string) {
         const newUser = await handleUserLogin(ws, content);
 
         sendMessageToOnlineUsers(newUser, {
-          type: messageTypes.UPDATE_USERS,
+          type: messageTypes.USER_JOINED,
           content: { name: newUser.name, _id: newUser._id },
         });
       }
@@ -49,6 +50,10 @@ export default async function messageHandler(ws: WebSocket, json: string) {
 
     case messageTypes.ICE_CANDIDATE:
       await sendConnectionCandidate(content);
+      break;
+
+    case messageTypes.USER_LEFT:
+      handleUserLogout(content);
       break;
 
     default:

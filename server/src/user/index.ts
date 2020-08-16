@@ -11,7 +11,10 @@ import {
   connectionOfferRequest,
   connectionAnswerRequest,
   connectionCandidateRequest,
+  userId,
 } from "./types/user";
+
+import { sendNotOnlineMessage, throwLoginException } from "./helpers/userHelpers";
 
 const connectedUsers: Map<string, WebSocket> = new Map();
 
@@ -19,25 +22,34 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
   let user = await getUserByName(name);
 
   if (!user) {
+    if (!password) {
+      throw {
+        type: messageTypes.ERROR,
+        success: false,
+        content: "Password is required.",
+      };
+    }
+
     user = await createUser({ name, password });
   }
 
   if (user.password !== password) {
     throw {
-      type: messageTypes.LOGIN,
+      type: messageTypes.ERROR,
       success: false,
       content: "Password is not correct.",
     };
   }
 
-  if (connectedUsers.get(user._id)) {
+  if (connectedUsers.has(user._id)) {
     throw {
-      type: messageTypes.LOGIN,
+      type: messageTypes.ERROR,
       success: false,
       content: "User is already online.",
     };
   }
 
+  ws.userId = user._id;
   connectedUsers.set(user._id, ws);
 
   sendMessage(ws, {
@@ -49,7 +61,21 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
     },
   });
 
+  ws.on("close", () => handleUserLogout(user._id));
   return user;
+}
+
+export function handleUserLogout(userId: userId) {
+  const userConnection = connectedUsers.get(userId);
+  userConnection.terminate();
+  connectedUsers.delete(userId);
+
+  sendMessageToOnlineUsers({ _id: null, name: null }, {
+    type: messageTypes.USER_LEFT,
+    content: {
+      userId: userId,
+    }
+  })
 }
 
 export async function sendMessageToOnlineUsers(op: user, message: message) {
@@ -153,21 +179,5 @@ export async function sendConnectionCandidate({
       candidate,
       user: from,
     },
-  });
-}
-
-function throwLoginException() {
-  throw {
-    type: messageTypes.ERROR,
-    success: false,
-    content: "Login first.",
-  };
-}
-
-function sendNotOnlineMessage(connection: WebSocket) {
-  sendMessage(connection, {
-    type: messageTypes.ERROR,
-    success: false,
-    content: "User is no longer online.",
   });
 }
