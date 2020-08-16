@@ -10,6 +10,7 @@ import {
   user,
   connectionOfferRequest,
   connectionAnswerRequest,
+  connectionCandidateRequest,
 } from "./types/user";
 
 const connectedUsers: Map<string, WebSocket> = new Map();
@@ -70,11 +71,7 @@ export async function offerConnection({
 
   const userConnection = connectedUsers.get(from._id);
   if (!userConnection) {
-    throw {
-      type: messageTypes.ERROR,
-      success: false,
-      content: "Login first.",
-    };
+    throwLoginException();
   }
 
   const recipient = await getUserById(to);
@@ -90,12 +87,7 @@ export async function offerConnection({
 
   const recipientConnection = connectedUsers.get(recipient._id);
   if (!recipientConnection) {
-    sendMessage(userConnection, {
-      type: messageTypes.ERROR,
-      success: false,
-      content: "Requested user is not online.",
-    });
-
+    sendNotOnlineMessage(recipientConnection);
     return;
   }
 
@@ -117,22 +109,13 @@ export async function answerConnection({
 
   const userConnection = connectedUsers.get(from._id);
   if (!userConnection) {
-    throw {
-      type: messageTypes.ERROR,
-      success: false,
-      content: "Login first.",
-    };
+    throwLoginException();
   }
 
   const sender = await getUserById(to);
   const senderConnection = connectedUsers.get(sender._id);
   if (!senderConnection) {
-    sendMessage(userConnection, {
-      type: messageTypes.ERROR,
-      success: false,
-      content: "User is no longer online.",
-    });
-
+    sendNotOnlineMessage(senderConnection);
     return;
   }
 
@@ -142,5 +125,49 @@ export async function answerConnection({
       answer,
       user: from,
     },
+  });
+}
+
+export async function sendConnectionCandidate({
+  from,
+  candidate,
+  to,
+}: connectionCandidateRequest) {
+  if (from._id === to) return;
+
+  const userConnection = connectedUsers.get(from._id);
+  if (!userConnection) {
+    throwLoginException();
+  }
+
+  const recipient = await getUserById(to);
+  const recipientConnection = connectedUsers.get(recipient._id);
+  if (!recipientConnection) {
+    sendNotOnlineMessage(recipientConnection);
+    return;
+  }
+
+  sendMessage(recipientConnection, {
+    type: messageTypes.ICE_CANDIDATE,
+    content: {
+      candidate,
+      user: from,
+    },
+  });
+}
+
+function throwLoginException() {
+  throw {
+    type: messageTypes.ERROR,
+    success: false,
+    content: "Login first.",
+  };
+}
+
+function sendNotOnlineMessage(connection: WebSocket) {
+  sendMessage(connection, {
+    type: messageTypes.ERROR,
+    success: false,
+    content: "User is no longer online.",
   });
 }

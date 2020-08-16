@@ -8,6 +8,7 @@ import {
   sendMessageToOnlineUsers,
   offerConnection,
   answerConnection,
+  sendConnectionCandidate,
 } from "./user";
 
 const parseMessage = (json: string): message => {
@@ -44,6 +45,10 @@ export default async function messageHandler(ws: WebSocket, json: string) {
 
     case messageTypes.CONNECTION_ANSWER:
       await answerConnection(content);
+      break;
+
+    case messageTypes.ICE_CANDIDATE:
+      await sendConnectionCandidate(content);
       break;
 
     default:

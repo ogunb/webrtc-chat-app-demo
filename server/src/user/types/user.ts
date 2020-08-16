@@ -17,3 +17,9 @@ export interface connectionAnswerRequest {
   to: userId,
   answer: any,
 }
+
+export interface connectionCandidateRequest {
+  from: user,
+  to: userId,
+  candidate: any,
+}
