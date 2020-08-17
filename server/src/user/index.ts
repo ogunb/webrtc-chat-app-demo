@@ -49,7 +49,6 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
     };
   }
 
-  ws.userId = user._id;
   connectedUsers.set(user._id, ws);
 
   sendMessage(ws, {
