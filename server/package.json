@@ -1,7 +1,7 @@
 {
-  "name": "websocket-demo",
+  "name": "webrtc-chat-app-demo__signalling-server",
   "version": "1.0.0",
-  "description": "Web Socket Demo",
+  "description": "Signalling Server",
   "main": "dist/index.ts",
   "scripts": {
     "start": "ts-node-dev ./src"
