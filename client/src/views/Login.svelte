@@ -4,14 +4,17 @@
   import { user } from "../store";
 
   let me;
+  let username = "";
+  let password = "";
+  let isLoggingIn = false;
+
   user.subscribe((data) => {
+    isLoggingIn = false;
     me = data;
   });
 
-  let username = "";
-  let password = "";
-
   function handleLogin() {
+    isLoggingIn = true;
     login({ username, password });
 
     username = "";
@@ -29,7 +32,7 @@
       Password:
       <input type="password" placeholder="Password" bind:value={password} />
     </label>
-    <button>CONNECT</button>
+    <button disabled={isLoggingIn}>CONNECT</button>
   </form>
 
   <p>{JSON.stringify(me)}</p>
