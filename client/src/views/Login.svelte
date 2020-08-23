@@ -3,14 +3,12 @@
   import { login } from "../services/chat";
   import { user } from "../store";
 
-  let me;
   let username = "";
   let password = "";
   let isLoggingIn = false;
 
   user.subscribe((data) => {
     isLoggingIn = false;
-    me = data;
   });
 
   function handleLogin() {
@@ -34,6 +32,4 @@
     </label>
     <button disabled={isLoggingIn}>CONNECT</button>
   </form>
-
-  <p>{JSON.stringify(me)}</p>
 </main>

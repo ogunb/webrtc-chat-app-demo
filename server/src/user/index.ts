@@ -14,7 +14,10 @@ import {
   userId,
 } from "./types/user";
 
-import { sendNotOnlineMessage, throwLoginException } from "./helpers/userHelpers";
+import {
+  sendNotOnlineMessage,
+  throwLoginException,
+} from "./helpers/userHelpers";
 
 const connectedUsers: Map<string, WebSocket> = new Map();
 
@@ -49,14 +52,18 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
     };
   }
 
+  const onlineUsers: user[] = await getAllOnlineUsers();
   connectedUsers.set(user._id, ws);
 
   sendMessage(ws, {
     type: messageTypes.LOGIN,
     success: true,
     content: {
-      name: user.name,
-      _id: user._id,
+      user: {
+        name: user.name,
+        _id: user._id,
+      },
+      onlineUsers,
     },
   });
 
@@ -64,17 +71,42 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
   return user;
 }
 
+async function getAllOnlineUsers(): Promise<user[]> {
+  return new Promise((resolve) => {
+    const onlineUsers: user[] = [];
+
+    if (connectedUsers.size === 0 ) {
+      resolve(onlineUsers);
+      return;
+    }
+
+    connectedUsers.forEach(async (_, id) => {
+      const user = await getUserById(id);
+      if (!user) return;
+
+      onlineUsers.push({ name: user.name, _id: user._id });
+
+      if (onlineUsers.length === connectedUsers.size) {
+        resolve(onlineUsers)
+      }
+    });
+  });
+}
+
 export function handleUserLogout(userId: userId) {
   const userConnection = connectedUsers.get(userId);
   userConnection.terminate();
   connectedUsers.delete(userId);
 
-  sendMessageToOnlineUsers({ _id: null, name: null }, {
-    type: messageTypes.USER_LEFT,
-    content: {
-      userId: userId,
+  sendMessageToOnlineUsers(
+    { _id: null, name: null },
+    {
+      type: messageTypes.USER_LEFT,
+      content: {
+        userId: userId,
+      },
     }
-  })
+  );
 }
 
 export async function sendMessageToOnlineUsers(op: user, message: message) {

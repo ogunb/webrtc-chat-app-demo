@@ -1,6 +1,6 @@
 import { sendMessage, listenEvent, removeEvent } from './socket';
-import { user, isSocketOpen } from '../store';
-import { LOGIN, CONNECT } from '../enums/messageTypes';
+import { user, isSocketOpen, onlineUsers } from '../store';
+import { LOGIN, CONNECT, USER_JOINED } from '../enums/messageTypes';
 import notification from './notification';
 import eventEmitter from './eventEmitter';
 
@@ -17,19 +17,23 @@ export function initChat() {
         handleLoginEvent(data)
         break;
 
-      // case messageTypes.CONNECTION_OFFER:
+      case USER_JOINED:
+        handleUserJoin(data);
+        break;
+
+      // case CONNECTION_OFFER:
       //   await offerConnection(content);
       //   break;
 
-      // case messageTypes.CONNECTION_ANSWER:
+      // case CONNECTION_ANSWER:
       //   await answerConnection(content);
       //   break;
 
-      // case messageTypes.ICE_CANDIDATE:
+      // case ICE_CANDIDATE:
       //   await sendConnectionCandidate(content);
       //   break;
 
-      // case messageTypes.USER_LEFT:
+      // case USER_LEFT:
       //   handleUserLogout(content);
       //   break;
 
@@ -45,15 +49,20 @@ function handleConnectEvent(data) {
 }
 
 function handleLoginEvent(data) {
-  const { type, success, content } = data;
+  const { success, content } = data;
 
   if (!success) {
     notification.error(content);
     return;
   }
 
-  user.update(user => user = content);
+  user.set(content.user);
+  onlineUsers.set(content.onlineUsers);
   eventEmitter.emit(LOGIN, data);
+}
+
+function handleUserJoin({ content }) {
+  onlineUsers.update(users => [...users, content]);
 }
 
 export function login({ username, password }) {
