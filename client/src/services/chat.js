@@ -1,6 +1,6 @@
 import { sendMessage, listenEvent, removeEvent } from './socket';
 import { user, isSocketOpen, onlineUsers } from '../store';
-import { LOGIN, CONNECT, USER_JOINED } from '../enums/messageTypes';
+import { LOGIN, CONNECT, USER_JOINED, USER_LEFT } from '../enums/messageTypes';
 import notification from './notification';
 import eventEmitter from './eventEmitter';
 
@@ -33,9 +33,9 @@ export function initChat() {
       //   await sendConnectionCandidate(content);
       //   break;
 
-      // case USER_LEFT:
-      //   handleUserLogout(content);
-      //   break;
+      case USER_LEFT:
+        handleUserLeft(data);
+        break;
 
       default:
         console.error(data);
@@ -63,6 +63,17 @@ function handleLoginEvent(data) {
 
 function handleUserJoin({ content }) {
   onlineUsers.update(users => [...users, content]);
+}
+
+function handleUserLeft({ content }) {
+  onlineUsers.update((users) => {
+    const partedUserId = content.userId;
+    const userIndex = users.findIndex(user => user._id === partedUserId);
+
+    const newUsers = [...users];
+    newUsers.splice(userIndex, 1);
+    return newUsers;
+  });
 }
 
 export function login({ username, password }) {

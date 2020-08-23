@@ -1,22 +1,27 @@
 <script>
-  import { NotificationDisplay } from "@beyonk/svelte-notifications";
   import { login } from "../services/chat";
-  import { user } from "../store";
+  import eventEmitter from "../services/eventEmitter";
+  import { LOGIN } from "../enums/messageTypes";
 
   let username = "";
   let password = "";
   let isLoggingIn = false;
 
-  user.subscribe((data) => {
-    isLoggingIn = false;
-  });
-
   function handleLogin() {
     isLoggingIn = true;
     login({ username, password });
 
-    username = "";
-    password = "";
+    function loggedIn({ success }) {
+      if (success) {
+        username = "";
+        password = "";
+      }
+
+      isLoggingIn = false;
+      unsub();
+    }
+
+    const unsub = eventEmitter.subscribe(LOGIN, loggedIn);
   }
 </script>
 

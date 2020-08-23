@@ -7,8 +7,6 @@
   import { isSocketOpen, user } from "./store";
   import { initChat } from "./services/chat";
 
-  let isSocketReady;
-  isSocketOpen.subscribe((value) => (isSocketReady = value));
   let isUserLoggedIn;
   user.subscribe((value) => (isUserLoggedIn = !!value._id));
   initChat();
@@ -16,7 +14,7 @@
 
 <NotificationDisplay />
 
-{#if !isSocketReady}
+{#if !$isSocketOpen}
   <p>loading...</p>
 {:else if isUserLoggedIn}
   <Chat />

@@ -8,9 +8,7 @@ function eventEmitter(initialEvents = {}) {
   }
 
   function unsubscribe(name, cb) {
-    console.log(events)
-    events[name] && events[name].splice(events[name].indexOf(cb) >>> 0, 1)
-    console.log(events)
+    events[name] && events[name].splice(events[name].indexOf(cb) >>> 0, 1);
   }
 
   function emit(name, ...args) {
