@@ -24,7 +24,7 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
   if (!user) {
     if (!password) {
       throw {
-        type: messageTypes.ERROR,
+        type: messageTypes.LOGIN,
         success: false,
         content: "Password is required.",
       };
@@ -35,7 +35,7 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
 
   if (user.password !== password) {
     throw {
-      type: messageTypes.ERROR,
+      type: messageTypes.LOGIN,
       success: false,
       content: "Password is not correct.",
     };
@@ -43,7 +43,7 @@ export async function handleUserLogin(ws: WebSocket, { name, password }: user) {
 
   if (connectedUsers.has(user._id)) {
     throw {
-      type: messageTypes.ERROR,
+      type: messageTypes.LOGIN,
       success: false,
       content: "User is already online.",
     };

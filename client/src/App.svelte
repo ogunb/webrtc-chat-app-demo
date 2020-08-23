@@ -1,22 +1,20 @@
 <script>
-  let username = "";
-  let password = "";
+  import { NotificationDisplay } from "@beyonk/svelte-notifications";
 
-  function handleLogin() {
-    console.log({ username, password });
-  }
+  import Login from "./views/Login.svelte";
+
+  import { isSocketOpen } from "./store";
+  import { initChat } from "./services/chat";
+
+  let isSocketReady;
+  isSocketOpen.subscribe((value) => (isSocketReady = value));
+  initChat();
 </script>
 
-<main>
-  <form on:submit|preventDefault={handleLogin}>
-    <label>
-      Username:
-      <input type="text" placeholder="Username" bind:value={username}/>
-    </label>
-    <label>
-      Password:
-      <input type="password" placeholder="Password" bind:value={password}/>
-    </label>
-    <button>CONNECT</button>
-  </form>
-</main>
+<NotificationDisplay />
+
+{#if !isSocketReady}
+  <p>loading...</p>
+{:else}
+  <Login />
+{/if}
