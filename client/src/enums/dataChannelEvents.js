@@ -1,0 +1,7 @@
+export const DATA_CHANNEL_OPEN = 'DATA_CHANNEL_OPEN';
+export const DATA_CHANNEL_MESSAGE = 'DATA_CHANNEL_MESSAGE';
+
+export default Object.freeze({
+  DATA_CHANNEL_OPEN,
+  DATA_CHANNEL_MESSAGE,
+})
