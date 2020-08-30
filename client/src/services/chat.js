@@ -8,8 +8,11 @@ import eventEmitter from './eventEmitter';
 let $user;
 let $chattingWith;
 let $connection;
+let $dataChannel;
+
 user.subscribe(val => $user = val);
 chattingWith.subscribe(val => $chattingWith = val);
+dataChannel.subscribe(val => $dataChannel = val);
 connection.subscribe(val => {
   $connection = val
 
@@ -151,8 +154,11 @@ async function handleIceCandidate({ content }) {
   await $connection.addIceCandidate(candidate);
 }
 
-
 export function login({ username, password }) {
   const userData = { name: username, password };
   sendMessage({ type: LOGIN, content: userData });
+}
+
+export function sendMessageToChannel(text) {
+  $dataChannel.send(JSON.stringify(text));
 }

@@ -1,6 +1,7 @@
 <script>
   import eventEmitter from "../services/eventEmitter";
   import { sendMessage } from "../services/socket";
+  import { sendMessageToChannel } from "../services/chat";
 
   import { CONNECTION_OFFER, ICE_CANDIDATE } from "../enums/messageTypes";
   import {
@@ -16,13 +17,26 @@
     connection,
   } from "../store";
 
+  eventEmitter.subscribe(DATA_CHANNEL_OPEN, handleDataChannelReady);
+  eventEmitter.subscribe(
+    DATA_CHANNEL_MESSAGE,
+    handleDataChannelMessageReceived
+  );
+
   let messages = {};
   let currentMessage = "";
   let isConnecting = false;
 
   function selectUser(selectedUser) {
     isConnecting = true;
+    currentMessage = "";
+
     chattingWith.set(selectedUser);
+
+    if (!messages[$chattingWith.name]) {
+      messages[$chattingWith.name] = [];
+    }
+
     startConnection();
   }
 
@@ -43,13 +57,15 @@
       });
     } catch (err) {
       console.error(err);
-    } finally {
-      isConnecting = false;
     }
   }
 
   function createDataChannel() {
     let newDataChannel = $connection.createDataChannel("messenger");
+    newDataChannel.addEventListener("open", (...args) => {
+      console.info("Data channel is open and ready to be used.");
+      eventEmitter.emit(DATA_CHANNEL_OPEN, ...args);
+    });
     newDataChannel.addEventListener("message", (...args) => {
       eventEmitter.emit(DATA_CHANNEL_MESSAGE, ...args);
     });
@@ -57,9 +73,18 @@
   }
 
   function sendPartnerMessage(message) {
+    if (!messages[$chattingWith.name]) {
+      messages[$chattingWith.name] = [];
+    }
+
     const timeStamp = Date.now();
-    const text = { timeStamp, message, user: $user.name };
-    console.log(text);
+    const text = { timeStamp, msg: currentMessage, from: $user.name };
+
+    sendMessageToChannel(text);
+
+    text.from = "ME";
+    currentMessage = "";
+    messages[$chattingWith.name] = [...messages[$chattingWith.name], text];
   }
 
   function handleDataChannelMessageReceived(event) {
@@ -67,16 +92,18 @@
       messages[$chattingWith.name] = [];
     }
 
-    messages[$chattingWith.name].push(event.data);
+    messages[$chattingWith.name] = [
+      ...messages[$chattingWith.name],
+      JSON.parse(event.data),
+    ];
   }
 
-  eventEmitter.subscribe(
-    DATA_CHANNEL_MESSAGE,
-    handleDataChannelMessageReceived
-  );
+  function handleDataChannelReady() {
+    isConnecting = false;
+  }
 </script>
 
-<h3>Online Users</h3>
+<h3>Online Users - You are: {$user.name}</h3>
 <ul>
   {#each $onlineUsers as user}
     <li>
@@ -92,7 +119,16 @@
 {#if isConnecting}
   <p>// connecting to {$chattingWith.name}...</p>
 {:else if $chattingWith.name}
-  <h1>{$chattingWith.name}</h1>
-  <p style="font-size: 80px">{JSON.stringify(messages)}</p>
+  {#if messages[$chattingWith.name] && messages[$chattingWith.name].length}
+    {#each messages[$chattingWith.name] as message}
+      <p>
+        <i>{message.from}</i>
+        - {message.msg} -
+        <small>{new Date(message.timeStamp).toLocaleString('tr-TR')}</small>
+      </p>
+    {/each}
+  {/if}
+
+  <input type="text" bind:value={currentMessage} />
   <button on:click={sendPartnerMessage}>send message</button>
 {/if}
