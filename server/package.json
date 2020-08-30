@@ -4,7 +4,8 @@
   "description": "Signalling Server",
   "main": "dist/index.ts",
   "scripts": {
-    "start": "ts-node-dev ./src"
+    "start": "ts-node-dev ./src",
+    "build": "rimraf dist && tsc"
   },
   "keywords": [],
   "author": "babacanogun@gmail.com",
@@ -15,9 +16,10 @@
     "ws": "^7.3.1"
   },
   "devDependencies": {
-    "@types/nedb": "^1.8.10",
     "@types/express": "^4.17.7",
+    "@types/nedb": "^1.8.10",
     "@types/ws": "^7.2.6",
+    "rimraf": "^3.0.2",
     "ts-node": "^8.10.2",
     "ts-node-dev": "^1.0.0-pre.57",
     "typescript": "^3.9.7"

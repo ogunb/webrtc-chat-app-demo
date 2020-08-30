@@ -7,7 +7,9 @@
     "client"
   ],
   "scripts": {
-    "start": "concurrently \"cd server && yarn start\" \"cd client && yarn dev\" --kill-others"
+    "start": "concurrently \"cd server && yarn start\" \"cd client && yarn dev\" --kill-others",
+    "build:server": "cd server && yarn build",
+    "build:client": "cd client && yarn build"
   },
   "author": "ogunb <babacanogun@gmail.com>",
   "license": "MIT",
