@@ -3,9 +3,9 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
-import replace from '@rollup/plugin-replace';
+import injectProcessEnv from 'rollup-plugin-inject-process-env';
 import { config } from 'dotenv-flow';
-console.log(config())
+
 const production = !process.env.ROLLUP_WATCH;
 
 function serve() {
@@ -57,6 +57,9 @@ export default {
       browser: true,
       dedupe: ['svelte']
     }),
+
+    injectProcessEnv({ ...process.env, ...config().parsed }),
+
     commonjs(),
 
     // In dev mode, call `npm run start` once
@@ -70,12 +73,6 @@ export default {
     // If we're building for production (npm run build
     // instead of npm run dev), minify
     production && terser(),
-
-    replace({
-      process: JSON.stringify({
-        env: config().parsed,
-      })
-    })
   ],
   watch: {
     clearScreen: false
