@@ -5,7 +5,7 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import replace from '@rollup/plugin-replace';
 import { config } from 'dotenv-flow';
-console.log(config)
+console.log(config())
 const production = !process.env.ROLLUP_WATCH;
 
 function serve() {
